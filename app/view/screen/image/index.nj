@@ -1,0 +1,9 @@
+{% extends "../../layout/default.nj" %}
+
+{% block main %}
+    {% for image in list %}
+    <li><a href="/image/new?tag={{ image.RepoTags }}">{{ image.RepoTags }}</a></li>
+    {% else %}
+    <li>This would display if the 'item' collection were empty</li>
+    {% endfor %}
+{% endblock %}

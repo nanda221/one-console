@@ -1,0 +1,37 @@
+{% extends "../../layout/default.nj" %}
+
+{% block main %}
+<div>
+    <input id="image_id" name="image_id" value="{{image_tag}}" placeholder="image_id" />
+    <input id="name" name="name" value="{{name}}" placeholder="name" />
+    <input id="ssh_port" name="ssh_port" value="{{ssh_port}}" placeholder="ssh_port" />
+    <input id="server_port" name="server_port" value="{{server_port}}" placeholder="server_port" />
+    <button id="sub">创建</button>
+</div>
+<div>
+    <input id="container_name" name="container_name" placeholder="container_name" />
+    <button id="run">运行</button>
+</div>
+<script>
+    const _csrf = '{{_csrf}}';
+    $('#sub').click((e) => {
+        $.post('/image', {
+            image_id: $('#image_id').val(),
+            ssh_port: $('#ssh_port').val(),
+            server_port: $('#server_port').val(),
+            name: $('#name').val(),
+            _csrf
+        }, (res) => {
+            console.log(res);
+        });
+    });
+    $('#run').click((e) => {
+        $.post('/image/run', {
+            container_name: $('#container_name').val(),
+            _csrf
+        }, (res) => {
+            console.log(res);
+        });
+    });
+</script>
+{% endblock %}

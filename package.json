@@ -1,0 +1,27 @@
+{
+  "name": "one-console",
+  "version": "1.0.0",
+  "description": "A local dev console acts like a docker factory. supports variaties of languages. DockerFiles are maintained in https://github.com/nanda221/docker-libs.",
+  "private": true,
+  "dependencies": {
+    "dockerode": "^2.5.3",
+    "egg": "^2.0.0",
+    "egg-view-nunjucks": "^2.1.4",
+    "nunjucks": "^3.0.1"
+  },
+  "devDependencies": {
+    "egg-bin": "^4.3.5"
+  },
+  "engines": {
+    "node": ">=8.9.0"
+  },
+  "scripts": {
+    "start": "egg-bin dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nanda221/one-console"
+  },
+  "author": "nanda221",
+  "license": "MIT"
+}

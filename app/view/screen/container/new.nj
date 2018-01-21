@@ -1,0 +1,21 @@
+{% extends "../../layout/default.nj" %}
+
+{% block main %}
+<input id="image_id" name="image_id" placeholder="image_id" />
+<input id="ssh_port" name="ssh_port" placeholder="ssh_port" />
+<input id="server_port" name="server_port" placeholder="server_port" />
+<button id="sub">创建并运行</button>
+<script>
+    const _csrf = '{{_csrf}}';
+    $('#sub').click((e) => {
+        $.post('/ops', {
+            image_id: $('#image_id').val(),
+            ssh_port: $('#ssh_port').val(),
+            server_port: $('#server_port').val(),
+            _csrf
+        }, (res) => {
+            console.log(res);
+        });
+    });
+</script>
+{% endblock %}
