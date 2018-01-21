@@ -1,53 +1,72 @@
 'use strict';
 
+// https://github.com/apocas/dockerode
+
+const child_process = require('child_process');
 const Controller = require('egg').Controller;
 const Docker = require('dockerode');
 
 const dockerClient = Docker({ socketPath: '/var/run/docker.sock' });
 
-class OpsController extends Controller {
+class ContainerController extends Controller {
     async index() {
         const { ctx, service } = this;
-        const ids = await new Promise((resolve, reject) => {
-            dockerClient.listContainers((err, containers) => {
-                containers.forEach(function (containerInfo) {
-                    // console.log(containerInfo);
-                    // console.log(dockerClient.getContainer(containerInfo.Id))
-                });
-                resolve(containers.map((info) => {
-                    return JSON.stringify(info)
-                }).join(' '));
-            });
-        });
-        await ctx.render('screen/ops/index', {
-            ids
+        const list = await dockerClient.listContainers();
+        // console.log(JSON.stringify(list));
+        await ctx.render('screen/container/index', {
+            _csrf: ctx.csrf,
+            list
         });
     }
     async new() {
-        const { ctx, service } = this;
-        await ctx.render('screen/ops/new', {
-            _csrf: ctx.csrf
-        });
-        console.log(dockerClient.listImages());
     }
     async create() {
         const { ctx, service } = this;
-        console.log(ctx.query);
-        console.log(ctx.request.body);
-        // dockerClient.createContainer({
-        //     Image: 'ubuntu:17.04',
-        //     AttachStdin: false,
-        //     AttachStdout: true,
-        //     AttachStderr: true,
-        //     Tty: true,
-        //     Cmd: ['/bin/bash', '-c', 'tail -f /var/log/dmesg'],
-        //     OpenStdin: false,
-        //     StdinOnce: false
-        // }).then(function (container) {
-        //     console.log(container);
-        //     return container.start();
-        // });
+        const { image_id, ssh_port, server_port } = ctx.request.body;
+        const container = await dockerClient.run(image_id, null, process.stdout, {
+            Image: image_id,
+            // 运行时和宿主环境相关的信息在HostConfig里设置
+            // https://docs.docker.com/engine/api/v1.32/#operation/ContainerCreate
+            HostConfig: {
+                PortBindings: {
+                    "22/tcp": [
+                        {
+                            "HostIp": "0.0.0.0",
+                            "HostPort": "10112"
+                        }
+                    ],
+                    "80/tcp": [
+                        {
+                            "HostIp": "0.0.0.0",
+                            "HostPort": "8081"
+                        }
+                    ]
+                },
+                Binds: ['/Users/nanda221/Code/one-console:/webapp']
+            }
+        });
+        ctx.body = container;
+    }
+    async destroyAll() {
+        const { ctx, service } = this;
+        const res = child_process.spawnSync('docker', ['ps', '-a', '-q']);
+        if (res.error) {
+            ctx.body = res.error;
+        }
+        else if (res.status !== 0) {
+            ctx.body = new String(res.stderr);
+        }
+        else {
+            const containers = new String(res.stdout).split('\n').slice(0, -1);
+            if(containers.length) {
+                const rmRes = child_process.spawnSync('docker', ['rm', '-f'].concat(containers));
+                ctx.body = 'Destroy containers: ' + new String(rmRes.stdout);
+            }
+            else {
+                ctx.body = 'no containers exist.';
+            }
+        }
     }
 }
 
-module.exports = OpsController;
+module.exports = ContainerController;

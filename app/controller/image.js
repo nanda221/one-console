@@ -7,7 +7,7 @@ const Docker = require('dockerode');
 
 const dockerClient = Docker({ socketPath: '/var/run/docker.sock' });
 
-class OpsController extends Controller {
+class ImageController extends Controller {
     async index() {
         const { ctx, service } = this;
         const list = await dockerClient.listImages();
@@ -54,4 +54,4 @@ class OpsController extends Controller {
     }
 }
 
-module.exports = OpsController;
+module.exports = ImageController;

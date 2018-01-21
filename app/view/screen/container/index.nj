@@ -1,3 +1,40 @@
-<div>
-{{ids}}
-</div>
+{% extends "../../layout/default.nj" %}
+
+{% block main %}
+    {% for container in list %}
+    <div>
+        <p>{{container.Names}} | {{container.Image}} | {{container.State}} | 运行时长{{container.Status}} | 
+        {{container.HostConfig}}</p>
+        <p>
+            {% for port in container.Ports %}
+            {{port.IP}}:{{port.PublicPort}}->{{port.PrivatePort}}/{{port.Type}}
+            {% endfor %}    
+        </p>
+        <p>
+            {% for mount in container.Mounts %}
+                {{mount.Type}}: {{mount.Source}}->{{mount.Destination}} {% if mount.RW %}读写{% else %}只读{% endif %}
+            {% endfor %}    
+        </p>
+    </div>
+    {% else %}
+    <li>No container exists.</li>
+    {% endfor %}
+    <div>
+        <button id="destroy_all">删除全部容器</button>
+    </div>
+    <script>
+        const _csrf = '{{_csrf}}';
+        $('#destroy_all').click(e => {
+            $.ajax({
+                url: '/container',
+                data: {
+                    _csrf
+                },
+                type: 'DELETE'
+            })
+                .then(res => {
+                    console.log(res);
+                });
+        });
+    </script>
+{% endblock %}
